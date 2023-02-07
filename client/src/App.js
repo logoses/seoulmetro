@@ -1,69 +1,61 @@
-import "./App.css";
-import { useState } from "react";
-import { metroApi } from "./api";
+import './App.css';
+import { useState } from 'react';
+import { csvFileToArray } from './utils/csvFileToArray';
+import axios from 'axios';
 
 function App() {
-  const [file, setFile] = useState();
   const [array, setArray] = useState([]);
 
-  const fileReader = new FileReader();
-
-  const csvFileToArray = string => {
-    const csvHeader = string.slice(0, string.indexOf("\n")).split(",");
-    const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
-
-    const array = csvRows.map(i => {
-      const values = i.split(",");
-      const obj = csvHeader.reduce((object, header, index) => {
-        object[header] = values[index];
-        return object;
-      }, {});
-      return obj;
-    });
-
-    setArray(array);
-  };
-
-  const handleOnSubmit = (e) => {
-    e.preventDefault();
+  const handleFileRead = e => {
+    const target = e.currentTarget;
+    const file = target.files[0];
 
     if (file) {
-      fileReader.onload = function (event) {
-        const text = event.target.result;
-        csvFileToArray(text);
-      };
+      const fileReader = new FileReader();
 
-      fileReader.readAsText(file);
+      fileReader.readAsText(file, 'euc-kr');
+      fileReader.onload = e => {
+        const text = e.target.result;
+        const arr = csvFileToArray(text);
+        setArray(arr[0]);
+
+        const data = arr[1];
+
+        axios.post('http://localhost:4000/insert', {
+          line: data[1],
+          snumber: data[2],
+          sname: data[3],
+          column1: data[4],
+          column2: data[5],
+          column3: data[6],
+          column4: data[7],
+          column5: data[8],
+        });
+      };
     }
   };
 
   const headerKeys = Object.keys(Object.assign({}, ...array));
 
   return (
-    <div style={{ textAlign: "center" }}>
-      <h1>REACTJS CSV IMPORT EXAMPLE </h1>
+    <div className="container">
+      <h1>서울교통공사 역별 승하차 인원 정보</h1>
       <form>
-        <input
-          type={"file"}
-          id={"csvFileInput"}
-          accept={".csv"}
-          onChange={(e) => setFile(e.target.files[0])}
-        />
-
-        <button
-          onClick={(e) => {
-            handleOnSubmit(e);
-          }}
-        >
-          IMPORT CSV
-        </button>
+        <input type="file" accept=".csv" onChange={handleFileRead} />
       </form>
+
+      <div className="buttons">
+        <button onClick={onList}>List</button>
+        <button onClick={onExam1}>Exam1</button>
+        <button onClick={onExam2}>Exam2</button>
+        <button onClick={onExam3}>Exam3</button>
+      </div>
 
       <br />
 
       <table>
         <thead>
-          <tr key={"header"}>
+          <tr key="header">
             {headerKeys.map((key, idx) => (
               <th key={idx}>{key}</th>
             ))}
@@ -73,8 +65,8 @@ function App() {
         <tbody>
           {array.map((item, idx) => (
             <tr key={idx}>
-              {Object.values(item).map((val, idx) => (
-                <td key={idx}>{val}</td>
+              {Object.values(item).map((e, idx) => (
+                <td key={idx}>{e}</td>
               ))}
             </tr>
           ))}
