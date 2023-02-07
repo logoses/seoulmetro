@@ -1,23 +1,85 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { useState } from "react";
+import { metroApi } from "./api";
 
 function App() {
+  const [file, setFile] = useState();
+  const [array, setArray] = useState([]);
+
+  const fileReader = new FileReader();
+
+  const csvFileToArray = string => {
+    const csvHeader = string.slice(0, string.indexOf("\n")).split(",");
+    const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
+
+    const array = csvRows.map(i => {
+      const values = i.split(",");
+      const obj = csvHeader.reduce((object, header, index) => {
+        object[header] = values[index];
+        return object;
+      }, {});
+      return obj;
+    });
+
+    setArray(array);
+  };
+
+  const handleOnSubmit = (e) => {
+    e.preventDefault();
+
+    if (file) {
+      fileReader.onload = function (event) {
+        const text = event.target.result;
+        csvFileToArray(text);
+      };
+
+      fileReader.readAsText(file);
+    }
+  };
+
+  const headerKeys = Object.keys(Object.assign({}, ...array));
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div style={{ textAlign: "center" }}>
+      <h1>REACTJS CSV IMPORT EXAMPLE </h1>
+      <form>
+        <input
+          type={"file"}
+          id={"csvFileInput"}
+          accept={".csv"}
+          onChange={(e) => setFile(e.target.files[0])}
+        />
+
+        <button
+          onClick={(e) => {
+            handleOnSubmit(e);
+          }}
         >
-          Learn React
-        </a>
-      </header>
+          IMPORT CSV
+        </button>
+      </form>
+
+      <br />
+
+      <table>
+        <thead>
+          <tr key={"header"}>
+            {headerKeys.map((key, idx) => (
+              <th key={idx}>{key}</th>
+            ))}
+          </tr>
+        </thead>
+
+        <tbody>
+          {array.map((item, idx) => (
+            <tr key={idx}>
+              {Object.values(item).map((val, idx) => (
+                <td key={idx}>{val}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
