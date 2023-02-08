@@ -64,7 +64,45 @@ app.get("/list", (req, res) => {
 });
 
 app.get("/exam1", (req, res) => {
-  connection.query("SELECT * FROM SUBWAY", (error, result) => {
+  let sql =
+    "select id, line, snumber, sname, (column1 + column2 +  column3 + column4 + column5) as total from subway order by total desc limit 10";
+  connection.query(sql, (error, result) => {
+    if (error) throw error;
+
+    let headers = Object.keys(result[0]);
+    let values = [];
+
+    for (let i = 0; i < result.length - 1; i++) {
+      const value = Object.values(result[i]);
+      values.push(value);
+    }
+
+    res.json({ headers: headers, values: values });
+  });
+});
+
+app.get("/exam2", (req, res) => {
+  let sql =
+    "select id, line, snumber, sname, ((column1 + column2 +  column3 + column4 + column5) / 5) as average from subway order by average  limit 10";
+  connection.query(sql, (error, result) => {
+    if (error) throw error;
+
+    let headers = Object.keys(result[0]);
+    let values = [];
+
+    for (let i = 0; i < result.length - 1; i++) {
+      const value = Object.values(result[i]);
+      values.push(value);
+    }
+
+    res.json({ headers: headers, values: values });
+  });
+});
+
+app.get("/exam3", (req, res) => {
+  let sql =
+    "select id, line, snumber, sname, ((column1 + column2 +  column3 + column4 + column5) / 5) as average from subway order by average  limit 10";
+  connection.query(sql, (error, result) => {
     if (error) throw error;
 
     let headers = Object.keys(result[0]);
@@ -82,11 +120,3 @@ app.get("/exam1", (req, res) => {
 app.listen(port, () => {
   console.log(`Connect at http://localhost:${port}`);
 });
-
-// (select sname, column1 as number from subway order by column1 desc limit 10) union (select sname, column2 as number from subway order by column2 desc limit 10)
-// union (select sname, column3 as number from subway order by column1 desc limit 10) union (select sname, column4 as number from subway order by column4 desc limit 10)
-// union(select sname, column5 as number from subway order by column5 desc limit 10)
-
-// select sname, number from ((
-
-// ) order by number desc) where rownum <=10;
