@@ -1,10 +1,11 @@
-import './App.css';
-import { useState } from 'react';
-import { csvFileToArray } from './utils/csvFileToArray';
-import axios from 'axios';
+import "./App.css";
+import { useState } from "react";
+import { csvFileToArray } from "./utils/csvFileToArray";
+import { metroApi } from "./apis/index";
 
 function App() {
   const [array, setArray] = useState([]);
+  const [headers, setHeaders] = useState([]);
 
   const handleFileRead = e => {
     const target = e.currentTarget;
@@ -13,15 +14,17 @@ function App() {
     if (file) {
       const fileReader = new FileReader();
 
-      fileReader.readAsText(file, 'euc-kr');
+      fileReader.readAsText(file);
       fileReader.onload = e => {
         const text = e.target.result;
         const arr = csvFileToArray(text);
         setArray(arr[0]);
 
-        const data = arr[1];
+        const headerKeys = Object.keys(Object.assign({}, ...arr[0]));
+        setHeaders(headerKeys);
 
-        axios.post('http://localhost:4000/insert', {
+        const data = arr[1];
+        const body = {
           line: data[1],
           snumber: data[2],
           sname: data[3],
@@ -30,12 +33,26 @@ function App() {
           column3: data[6],
           column4: data[7],
           column5: data[8],
-        });
+        };
+
+        metroApi.insertRequest(body);
       };
     }
   };
 
-  const headerKeys = Object.keys(Object.assign({}, ...array));
+  const onList = async () => {
+    await metroApi
+      .showListRequest()
+      .then(res => res.data)
+      .then(data => {
+        setHeaders(data.headers);
+        setArray(data.values);
+      });
+  };
+
+  const onExam1 = () => {};
+  const onExam2 = () => {};
+  const onExam3 = () => {};
 
   return (
     <div className="container">
@@ -56,7 +73,7 @@ function App() {
       <table>
         <thead>
           <tr key="header">
-            {headerKeys.map((key, idx) => (
+            {headers.map((key, idx) => (
               <th key={idx}>{key}</th>
             ))}
           </tr>
