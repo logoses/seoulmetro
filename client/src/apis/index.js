@@ -30,4 +30,20 @@ export const metroApi = {
       url: "/exam1",
     });
   },
+
+  // show exam2
+  showExam2Request: () => {
+    return axiosDefaultInstance({
+      method: "get",
+      url: "/exam2",
+    });
+  },
+
+  // show exam3
+  showExam3Request: () => {
+    return axiosDefaultInstance({
+      method: "get",
+      url: "/exam3",
+    });
+  },
 };

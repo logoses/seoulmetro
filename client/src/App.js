@@ -50,9 +50,33 @@ function App() {
       });
   };
 
-  const onExam1 = () => {};
-  const onExam2 = () => {};
-  const onExam3 = () => {};
+  const onExam1 = async () => {
+    await metroApi
+      .showExam1Request()
+      .then(res => res.data)
+      .then(data => {
+        setHeaders(data.headers);
+        setArray(data.values);
+      });
+  };
+  const onExam2 = async () => {
+    await metroApi
+      .showExam2Request()
+      .then(res => res.data)
+      .then(data => {
+        setHeaders(data.headers);
+        setArray(data.values);
+      });
+  };
+  const onExam3 = async () => {
+    await metroApi
+      .showExam3Request()
+      .then(res => res.data)
+      .then(data => {
+        setHeaders(data.headers);
+        setArray(data.values);
+      });
+  };
 
   return (
     <div className="container">
