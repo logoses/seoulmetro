@@ -12,10 +12,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3001"],
     credentials: true,
     methods: ["GET", "POST"],
-  })
+  }),
 );
 
 app.get("/", (req, res) => {
@@ -23,9 +23,9 @@ app.get("/", (req, res) => {
 });
 
 app.post("/insert", (req, res) => {
-  for (let i = 0; i < req.body.line.length - 1; i++) {
+  for (let i = 0; i < req.body.line.length; i++) {
     let sql =
-      "INSERT INTO SUBWAY (line, snumber, sname, column1, column2, column3, column4, column5) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+      "INSERT INTO SUBWAY (line, snumber, sname, column1, column2, column3, column4, column5) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     let param = [
       req.body.line[i],
       req.body.snumber[i],
@@ -101,7 +101,12 @@ app.get("/exam2", (req, res) => {
 
 app.get("/exam3", (req, res) => {
   let sql =
-    "select id, line, snumber, sname, ((column1 + column2 +  column3 + column4 + column5) / 5) as average from subway order by average  limit 10";
+    "select id, line, snumber, sname, " +
+    "greatest(column1, column2, column3, column4, column5)as max, " +
+    "least(column1, column2, column3, column4, column5)as min, " +
+    "(greatest(cast(column1 as unsigned), cast(column2 as unsigned), cast(column3 as unsigned),cast(column4 as unsigned), cast(column5 as unsigned)) - " +
+    "least(cast(column1 as unsigned), cast(column2 as unsigned), cast(column3 as unsigned),cast(column4 as unsigned), cast(column5 as unsigned))) as gap " +
+    "from subway order by gap desc limit 10;";
   connection.query(sql, (error, result) => {
     if (error) throw error;
 
